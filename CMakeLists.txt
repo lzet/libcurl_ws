@@ -31,6 +31,8 @@ set(CURL_USE_OPENSSL OFF CACHE BOOL "" FORCE)
 set(CURL_USE_PKGCONFIG OFF CACHE BOOL "" FORCE)
 set(CURL_USE_LIBPSL OFF CACHE BOOL "" FORCE)
 
+add_custom_target(forcurlbuid "" DEPENDS mbedtls)
+
 add_subdirectory(3rdparty/curl-8.11.1)
 set(CURL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/curl-8.11.1/include CACHE STRING "" FORCE)
 set(CURL_LIBRARY libcurl_static CACHE STRING "" FORCE)
@@ -60,6 +62,8 @@ target_link_libraries(${PROJECT_NAME}_static ${CURL_LIBRARIES})
 
 add_library(${PROJECT_NAME} SHARED ${src})
 target_link_libraries(${PROJECT_NAME} ${CURL_LIBRARIES})
+
+add_dependencies(${PROJECT_NAME} forcurlbuid)
 
 if(BUILD_TEST)
     add_executable(${PROJECT_NAME}_test ${src} ${src_test})
