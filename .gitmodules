@@ -1,0 +1,6 @@
+[submodule "3rdparty/curl-8.11.1"]
+	path = 3rdparty/curl-8.11.1
+	url = https://github.com/curl/curl.git
+[submodule "3rdparty/mbedtls-3.6.2"]
+	path = 3rdparty/mbedtls-3.6.2
+	url = https://github.com/Mbed-TLS/mbedtls.git
