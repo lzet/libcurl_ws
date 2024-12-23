@@ -156,7 +156,7 @@ struct wsio_internal_t {
     std::function<void(const std::string&, const std::string&)> header_cb;
     std::function<void()> ping_cb;
 
-    bool recv_wait();
+    bool recv_wait(uint32_t millisec=2000);
     wscurl::wsf_type_t recv_process();
     CURLcode send_wait(const uint8_t *request, std::size_t request_len);
     std::string connection_request() const;
@@ -173,7 +173,7 @@ struct wsio_internal_t {
     void close();
     bool start(const std::string &uri, const std::string &protocol, bool make_async = true);
     bool write(wscurl::wsf_type_t type, const uint8_t *data, std::size_t datalen);
-    bool read();
+    bool read(uint32_t millisec);
 
     static wsio_internal_t* instance_from(const std::shared_ptr<void> &inptr);
     static void instance_deleter(void *in);
@@ -192,7 +192,7 @@ struct wsio_internal_t {
 const std::string wsio_internal_t::accept_header("Sec-WebSocket-Accept");
 const std::string wsio_internal_t::response_code_header("HTTP/1.1 ");
 
-bool wsio_internal_t::recv_wait()
+bool wsio_internal_t::recv_wait(uint32_t millisec)
 {
     if(!conn.is_open()) return false;
     CURLcode curl_err;
@@ -203,7 +203,7 @@ bool wsio_internal_t::recv_wait()
     bool recv_started = false;
     int recv_try_count = CURL_TIMEOUT;
     sclocktp starttime = sclock::now();
-    std::chrono::seconds timeout(2);
+    std::chrono::milliseconds timeout(millisec);
     while(true) {
         if(!recv_started) {
             --recv_try_count;
@@ -227,7 +227,7 @@ bool wsio_internal_t::recv_wait()
             }
         }
         else {
-            auto durtime = std::chrono::duration_cast<std::chrono::seconds>(sclock::now()-starttime);
+            auto durtime = std::chrono::duration_cast<std::chrono::milliseconds>(sclock::now()-starttime);
             if(durtime >= timeout) {
                 if(async) event_cb(wscurl::event_t::ERROR_EV, "error waiting for data (timeout)");
                 conn.resp.buf.clear();
@@ -268,6 +268,7 @@ wscurl::wsf_type_t wsio_internal_t::recv_process()
                     break;
                 case wscurl::wsf_type_t::CONTTINUATION_FRAME:
                 case wscurl::wsf_type_t::PONG_FRAME:
+                case wscurl::wsf_type_t::UNKNOWN_FRAME:
                     break;
                 }
                 conn.resp.resframe.clear();
@@ -620,14 +621,14 @@ bool wsio_internal_t::write(wscurl::wsf_type_t type, const uint8_t *data, std::s
     return true;
 }
 
-bool wsio_internal_t::read()
+bool wsio_internal_t::read(uint32_t millisec)
 {
     if(conn.curl == nullptr) {
         event_cb(wscurl::event_t::ERROR_EV, "read error: no connection");
         return false;
     }
     if(!async) {
-        if(!recv_wait()) return false;
+        if(!recv_wait(millisec)) return false;
         recv_process();
     }
     return true;
@@ -724,7 +725,7 @@ bool wscurl::wsio_t::write(const std::vector<uint8_t> &data)
     return wsio_internal_t::instance_from(_context)->write(wsf_type_t::BINARY_FRAME, data.data(), data.size());
 }
 
-bool wscurl::wsio_t::read()
+bool wscurl::wsio_t::read(uint32_t millisec)
 {
-    return wsio_internal_t::instance_from(_context)->read();
+    return wsio_internal_t::instance_from(_context)->read(millisec);
 }

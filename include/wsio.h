@@ -65,7 +65,12 @@ public:
     void stop();
     bool write(const std::string &data);
     bool write(const std::vector<uint8_t> &data);
-    bool read();
+    /**
+     * @brief read      read input
+     * @param millisec  timeout in milliseconds (2sec default)
+     * @return          true if success
+     */
+    bool read(uint32_t millisec = 2000);
 };
 
 }

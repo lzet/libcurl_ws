@@ -2,17 +2,16 @@
 
 ### depencies
 
-- libcurl
-- mbedtls
-- libz
+- libcurl (included)
+- mbedtls (included)
 
-### build
+### build static library and testapp
 
 ```sh
 # git clone --recurse https://github.com/lzet/libcurl_ws.git
 # mkdir -p libcurl_ws/build
 # cd libcurl_ws/build
-# cmake ..
+# cmake -DBUILD_TEST=ON ..
 # make
 ```
 
@@ -49,7 +48,7 @@ ws
         {}
         );
 
-struct S { // struct with callbacks
+struct S { // or struct with callbacks
     void message_cb(const std::string &msg) {
         std::cerr << "S:message_cb -> " << msg << std::endl;
     }
@@ -60,7 +59,7 @@ ws.on_message_text<S, &S::message_cb>(&struct_callback);
 // sync mode
 if(ws.start("wss://ws.vi-server.org/mirror", "", false)) {
     ws.write("Hello world!");
-    ws.read();
+    ws.read(1000); // 1sec timeout
     ws.write(std::vector<uint8_t>{'B','y','e',' ','w','o','r','l','d','!'});
     ws.read();
 }
@@ -70,7 +69,7 @@ ws.stop();
 if(ws.start("wss://ws.vi-server.org/mirror")) {
     ws.write("Hello world!");
     std::this_thread::sleep_for(std::chrono::seconds(1));
-    ws.write("Bye world!");
+    ws.write(std::vector<uint8_t>{'B','y','e',' ','w','o','r','l','d','!'});
     std::this_thread::sleep_for(std::chrono::seconds(1));
 }
 ws.stop();
