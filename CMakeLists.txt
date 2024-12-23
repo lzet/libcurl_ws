@@ -4,9 +4,13 @@ project(wscurl LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-option(BUILD_TEST "test utility build" ON)
+option(BUILD_TEST "test utility build" OFF)
+option(BUILD_SHARED "make shared library" OFF)
+
+if(BUILD_SHARED)
+    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+endif(BUILD_SHARED)
 
 set(ENABLE_PROGRAMS OFF CACHE BOOL "" FORCE)
 set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)
@@ -59,11 +63,13 @@ set(src_test
 
 add_library(${PROJECT_NAME}_static STATIC ${src})
 target_link_libraries(${PROJECT_NAME}_static ${CURL_LIBRARIES})
+add_dependencies(${PROJECT_NAME}_static forcurlbuid)
 
-add_library(${PROJECT_NAME} SHARED ${src})
-target_link_libraries(${PROJECT_NAME} ${CURL_LIBRARIES})
+if(BUILD_SHARED)
+    add_library(${PROJECT_NAME} SHARED ${src})
+    target_link_libraries(${PROJECT_NAME} ${CURL_LIBRARIES})
+endif(BUILD_SHARED)
 
-add_dependencies(${PROJECT_NAME} forcurlbuid)
 
 if(BUILD_TEST)
     add_executable(${PROJECT_NAME}_test ${src} ${src_test})
@@ -71,7 +77,13 @@ if(BUILD_TEST)
 endif(BUILD_TEST)
 
 include(GNUInstallDirs)
-install(TARGETS ${PROJECT_NAME}
+install(TARGETS ${PROJECT_NAME}_static
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+if(BUILD_SHARED)
+    install(TARGETS ${PROJECT_NAME}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    )
+endif(BUILD_SHARED)
