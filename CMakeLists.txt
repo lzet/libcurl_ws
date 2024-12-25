@@ -17,10 +17,10 @@ set(ENABLE_TESTING OFF CACHE BOOL "" FORCE)
 set(LINK_WITH_PTHREAD ON CACHE BOOL "" FORCE)
 
 add_subdirectory(3rdparty/mbedtls-3.6.2)
-set(MBEDTLS_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/mbedtls-3.6.2/include CACHE STRING "" FORCE)
-set(MBEDTLS_LIBRARY ${CMAKE_BINARY_DIR}/3rdparty/mbedtls-3.6.2/library/libmbedtls.a CACHE STRING "" FORCE)
-set(MBEDCRYPTO_LIBRARY ${CMAKE_BINARY_DIR}/3rdparty/mbedtls-3.6.2/library/libmbedcrypto.a CACHE STRING "" FORCE)
-set(MBEDX509_LIBRARY ${CMAKE_BINARY_DIR}/3rdparty/mbedtls-3.6.2/library/libmbedx509.a CACHE STRING "" FORCE)
+set(MBEDTLS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/mbedtls-3.6.2/include CACHE STRING "" FORCE)
+set(MBEDTLS_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/mbedtls-3.6.2/library/libmbedtls.a CACHE STRING "" FORCE)
+set(MBEDCRYPTO_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/mbedtls-3.6.2/library/libmbedcrypto.a CACHE STRING "" FORCE)
+set(MBEDX509_LIBRARY ${CMAKE_CURRENT_BINARY_DIR}/3rdparty/mbedtls-3.6.2/library/libmbedx509.a CACHE STRING "" FORCE)
 
 set(BUILD_CURL_EXE OFF CACHE BOOL "" FORCE)
 set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -38,7 +38,7 @@ set(CURL_USE_LIBPSL OFF CACHE BOOL "" FORCE)
 add_custom_target(forcurlbuid "" DEPENDS mbedtls)
 
 add_subdirectory(3rdparty/curl-8.11.1)
-set(CURL_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/curl-8.11.1/include CACHE STRING "" FORCE)
+set(CURL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/curl-8.11.1/include CACHE STRING "" FORCE)
 set(CURL_LIBRARY libcurl_static CACHE STRING "" FORCE)
 
 find_package(CURL REQUIRED)
@@ -46,13 +46,13 @@ find_package(CURL REQUIRED)
 include_directories(
     ${MBEDTLS_INCLUDE_DIR}
     ${CURL_INCLUDE_DIR}
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/3rdparty/cppcodec
-    ${CMAKE_SOURCE_DIR}/3rdparty/sha1
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/cppcodec
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/sha1
 )
 
 set(src
-    ${CMAKE_SOURCE_DIR}/3rdparty/sha1/sha1.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/sha1/sha1.cpp
 
     include/wsframe.h src/wsframe.cpp
     include/wsio.h src/wsio.cpp
