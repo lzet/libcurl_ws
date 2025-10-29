@@ -80,15 +80,11 @@ connection_info_t::connection_info_t(const std::string &uri, const std::string &
     std::stringstream stream;
     std::uppercase(stream);
     int sz2len = sizeof(int)*2;
-    for(int i = 0; i < 4; ++i) {
+    for(int i = 0; i < 2; ++i) {
         stream << std::setfill ('0') << std::setw(sz2len) << std::hex << std::rand();
     }
     guid = stream.str();
     pos = 8;
-    guid.insert(pos, "-");
-    pos += 5;
-    guid.insert(pos, "-");
-    pos += 5;
     guid.insert(pos, "-");
     pos += 5;
     guid.insert(pos, "-");
@@ -174,6 +170,8 @@ struct wsio_internal_t {
     bool start(const std::string &uri, const std::string &protocol, bool make_async = true);
     bool write(wscurl::wsf_type_t type, const uint8_t *data, std::size_t datalen);
     bool read(uint32_t millisec);
+
+    bool started();
 
     static wsio_internal_t* instance_from(const std::shared_ptr<void> &inptr);
     static void instance_deleter(void *in);
@@ -361,13 +359,13 @@ CURLcode wsio_internal_t::send_wait(const uint8_t *request, std::size_t request_
 std::string wsio_internal_t::connection_request() const
 {
     std::ostringstream ost(std::ios::out);
-    ost << "GET " << conn.path << " HTTP/1.1\n";
+    ost << "GET " << conn.path << " HTTP/1.1\r\n";
     auto hdrs_copy = hdrs;
     for(const auto &h: exthdrs)
         wsio_hdr_t::insert2vec(hdrs_copy, h);
     for(const auto &h: hdrs_copy)
-        ost << h.name << ": " << h.value << "\n";
-    ost << "\n";
+        ost << h.name << ": " << h.value << "\r\n";
+    ost << "\r\n";
     return ost.str();
 }
 
@@ -634,6 +632,11 @@ bool wsio_internal_t::read(uint32_t millisec)
     return true;
 }
 
+bool wsio_internal_t::started()
+{
+    return conn.curl != nullptr && conn.is_open();
+}
+
 wsio_internal_t *wsio_internal_t::instance_from(const std::shared_ptr<void> &inptr)
 {
     if(inptr) return static_cast<wsio_internal_t*>(inptr.get());
@@ -728,4 +731,9 @@ bool wscurl::wsio_t::write(const std::vector<uint8_t> &data)
 bool wscurl::wsio_t::read(uint32_t millisec)
 {
     return wsio_internal_t::instance_from(_context)->read(millisec);
+}
+
+bool wscurl::wsio_t::started()
+{
+    return wsio_internal_t::instance_from(_context)->started();
 }

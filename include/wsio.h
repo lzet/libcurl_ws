@@ -38,7 +38,7 @@ public:
     template<class S, auto CALLBK>
     wsio_t& on_event(void *s) {
         return on_event([s](event_t t, const std::string &m) {
-            (static_cast<S*>(s)->CALLBK)(t, m);
+            (static_cast<S*>(s)->*CALLBK)(t, m);
         });
     }
     template<class S, auto CALLBK>
@@ -71,6 +71,8 @@ public:
      * @return          true if success
      */
     bool read(uint32_t millisec = 2000);
+
+    bool started();
 };
 
 }
