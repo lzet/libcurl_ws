@@ -262,7 +262,7 @@ wscurl::wsf_type_t wsio_internal_t::recv_process()
                     break;
                 case wscurl::wsf_type_t::CONNECTION_CLOSE_FRAME:
                     event_cb(wscurl::event_t::DISCONNECT_EV, "closed by server");
-                    close();
+                    async = false;
                     break;
                 case wscurl::wsf_type_t::CONTTINUATION_FRAME:
                 case wscurl::wsf_type_t::PONG_FRAME:
